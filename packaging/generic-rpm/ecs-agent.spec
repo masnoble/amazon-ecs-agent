@@ -18,8 +18,8 @@
 %global no_exec_perm 644
 
 
-Name:           amazon-ecs-init
-Version:        1.53.0
+Name:           amazon-ecs-agent
+Version:        JOshua 
 Release:        1
 License:        Apache 2.0
 Summary:        Amazon Elastic Container Service initialization application
@@ -28,7 +28,6 @@ ExclusiveArch:  x86_64 aarch64
 Source0:        sources.tgz
 Source1:        ecs.service
 
-BuildRequires:  golang >= 1.7
 BuildRequires:  systemd
 Requires:       systemd
 Requires:       iptables
@@ -56,7 +55,7 @@ mkdir -p %{buildroot}%{_sharedstatedir}/ecs/data
 install -m %{no_exec_perm} -D %{SOURCE1} $RPM_BUILD_ROOT/%{_unitdir}/ecs.service
 
 %files
-%{_libexecdir}/amazon-ecs-init
+%{_libexecdir}/amazon-ecs-agent
 %config(noreplace) %ghost %{_sysconfdir}/ecs/ecs.config
 %config(noreplace) %ghost %{_sysconfdir}/ecs/ecs.config.json
 %dir %{_sharedstatedir}/ecs/data

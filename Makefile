@@ -298,10 +298,9 @@ GOPATH=$(shell go env GOPATH)
 get-deps: .get-deps-stamp
 
 .generic-rpm-done:
-	./scripts/update-version.sh
 	cp packaging/generic-rpm/ecs-agent.spec ecs-agent.spec
 	cp packaging/generic-rpm/ecs.service ecs.service
-	tar -czf ./sources.tgz ecs-init scripts
+	tar -czf ./sources.tgz agent scripts
 	test -e SOURCES || ln -s . SOURCES
 	rpmbuild --define "%_topdir $(PWD)" -bb ecs-agent.spec
 	find RPMS/ -type f -exec cp {} . \;
