@@ -19,7 +19,7 @@
 
 
 Name:           amazon-ecs-agent
-Version:        JOshua 
+Version:        1.53
 Release:        1
 License:        Apache 2.0
 Summary:        Amazon Elastic Container Service initialization application
@@ -43,7 +43,9 @@ containerless agent.
 ./scripts/build false %{gobuild_tag}
 
 %install
-install -D out/amazon-ecs-agent %{buildroot}%{_libexecdir}/amazon-ecs-agent
+install -D generic_rpm %{buildroot}%{_libexecdir}/amazon-ecs-agent
+install -D %{_topdir}/packaging/generic-rpm/ipSetup.sh %{buildroot}%{_libexecdir}/ipSetup.sh
+install -D %{_topdir}/packaging/generic-rpm/ipCleanup.sh %{buildroot}%{_libexecdir}/ipCleanup.sh
 
 mkdir -p %{buildroot}%{_sysconfdir}/ecs
 touch %{buildroot}%{_sysconfdir}/ecs/ecs.config
@@ -56,6 +58,8 @@ install -m %{no_exec_perm} -D %{SOURCE1} $RPM_BUILD_ROOT/%{_unitdir}/ecs.service
 
 %files
 %{_libexecdir}/amazon-ecs-agent
+%{_libexecdir}/ipSetup.sh
+%{_libexecdir}/ipCleanup.sh
 %config(noreplace) %ghost %{_sysconfdir}/ecs/ecs.config
 %config(noreplace) %ghost %{_sysconfdir}/ecs/ecs.config.json
 %dir %{_sharedstatedir}/ecs/data
