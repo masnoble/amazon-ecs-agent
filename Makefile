@@ -328,4 +328,16 @@ clean:
 	-rm -rf $(PWD)/bin
 	-rm -rf cover.out
 	-rm -rf coverprofile.out
-
+	-rm -f ecs-agent.spec
+	-rm -f ecs.service
+	-rm -f ./sources.tgz
+	-rm -f ./amazon-ecs-agent
+	-rm -f ./amazon-ecs-agent-*.rpm
+	-rm -f ./ecs-agent-*.tar
+	-rm -f ./ecs-agent-*.src.rpm
+	-rm -rf ./ecs-agent-*
+	-rm -rf ./BUILDROOT BUILD RPMS SRPMS SOURCES SPECS
+	-rm -rf ./x86_64
+	-rm -f ./amazon-ecs-agent_${VERSION}*
+	-rm -f .srpm-done .rpm-done .generic-rpm-done
+	-rm -f .deb-done
