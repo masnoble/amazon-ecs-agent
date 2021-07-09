@@ -235,33 +235,33 @@ func (agent *ecsAgent) capabilities() ([]*ecs.Attribute, error) {
 	capabilities = agent.appendPIDAndIPCNamespaceSharingCapabilities(capabilities)
 
 	// ecs agent version 1.26.0 supports aws-appmesh cni plugin
-	capabilities = agent.appendAppMeshCapabilities(capabilities)
+	//capabilities = agent.appendAppMeshCapabilities(capabilities)
 
 	// support elastic inference in agent
-	capabilities = agent.appendTaskEIACapabilities(capabilities)
+	//capabilities = agent.appendTaskEIACapabilities(capabilities)
 
 	// support aws router capabilities for fluentd
-	capabilities = agent.appendFirelensFluentdCapabilities(capabilities)
+	//capabilities = agent.appendFirelensFluentdCapabilities(capabilities)
 
 	// support aws router capabilities for fluentbit
-	capabilities = agent.appendFirelensFluentbitCapabilities(capabilities)
+	//capabilities = agent.appendFirelensFluentbitCapabilities(capabilities)
 
 	// support aws router capabilities for log driver router
-	capabilities = agent.appendFirelensLoggingDriverCapabilities(capabilities)
+	//capabilities = agent.appendFirelensLoggingDriverCapabilities(capabilities)
 
 	// support efs on ecs capabilities
 	capabilities = agent.appendEFSCapabilities(capabilities)
 
 	// support external firelens config
-	capabilities = agent.appendFirelensConfigCapabilities(capabilities)
+	//capabilities = agent.appendFirelensConfigCapabilities(capabilities)
 
 	// support GMSA capabilities
 	capabilities = agent.appendGMSACapabilities(capabilities)
 
 	// support efs auth on ecs capabilities
-	for _, cap := range agent.cfg.VolumePluginCapabilities {
-		capabilities = agent.appendEFSVolumePluginCapabilities(capabilities, cap)
-	}
+	//for _, cap := range agent.cfg.VolumePluginCapabilities {
+	//	capabilities = agent.appendEFSVolumePluginCapabilities(capabilities, cap)
+	//}
 
 	// support fsxWindowsFileServer on ecs capabilities
 	capabilities = agent.appendFSxWindowsFileServerCapabilities(capabilities)

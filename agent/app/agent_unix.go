@@ -48,7 +48,6 @@ const initPID = 1
 var awsVPCCNIPlugins = []string{ecscni.ECSENIPluginName,
 	ecscni.ECSBridgePluginName,
 	ecscni.ECSIPAMPluginName,
-	ecscni.ECSAppMeshPluginName,
 	ecscni.ECSBranchENIPluginName,
 }
 

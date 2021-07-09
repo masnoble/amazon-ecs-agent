@@ -297,12 +297,12 @@ GOPATH=$(shell go env GOPATH)
 
 get-deps: .get-deps-stamp
 
-.generic-rpm-done:
+.generic-rpm-done: pause-container-release
 	cp packaging/generic-rpm/ecs-agent.spec ecs-agent.spec
 	cp packaging/generic-rpm/ecs.service ecs.service
 	tar -czf ./sources.tgz agent scripts
 	test -e SOURCES || ln -s . SOURCES
-	rpmbuild --define "%_topdir $(PWD)" -bb ecs-agent.spec
+	rpmbuild --undefine=_disable_source_fetch --define "%_topdir $(PWD)" -bb ecs-agent.spec
 	find RPMS/ -type f -exec cp {} . \;
 	touch .rpm-done
 
@@ -341,3 +341,7 @@ clean:
 	-rm -f ./amazon-ecs-agent_${VERSION}*
 	-rm -f .srpm-done .rpm-done .generic-rpm-done
 	-rm -f .deb-done
+	-rm -f amazon-ecs-cni-plugins.tar.gz
+	-rm -f amazon-vpc-cni-plugins.tar.gz
+	-rm -rf ../amazon-ecs-cni-plugins
+	-rm -rf ../amazon-vpc-cni-plugins

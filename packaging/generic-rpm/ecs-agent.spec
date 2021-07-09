@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and
 # limitations under the License.
 
+
 %global gobuild_tag generic_rpm
 %global _cachedir %{_localstatedir}/cache
 %global bundled_agent_version %{version}
@@ -37,8 +38,8 @@ ExclusiveArch:  x86_64 aarch64
 
 Source0:        sources.tgz
 Source1:        ecs.service
-Source2: https://%{ecscni_goimport}/archive/%{ecscni_gitrev}/%{ecscni_gorepo}.tar.gz
-Source3: https://%{vpccni_goimport}/archive/%{vpccni_gitrev}/%{vpccni_gorepo}.tar.gz
+Source2:        https://%{ecscni_goimport}/archive/%{ecscni_gitrev}/%{ecscni_gorepo}.tar.gz
+Source3:        https://%{vpccni_goimport}/archive/%{vpccni_gitrev}/%{vpccni_gorepo}.tar.gz
 
 BuildRequires:  systemd
 Requires:       systemd
@@ -49,25 +50,33 @@ Requires:       procps
 containerless agent.
 
 %prep
-%setup -c
+%setup -c -n amazon-ecs-agent
 
-%setup -T -D -a 2 -q
 
-%setup -T -D -a 3 -q
+%setup -T -D -a 2 -q -c -n amazon-ecs-agent/src/github.com/aws
 
+%setup -T -D -a 3 -q -c -n amazon-ecs-agent/src/github.com/aws
+
+#mkdir -p %{_builddir}/src/%{ecscni_goproject}
 # Symlink amazon-ecs-cni-plugins-%{ecscni_gitrev} to the GOPATH location
-%cross_go_setup %{name}-%{version}/%{ecscni_gorepo}-%{ecscni_gitrev} %{ecscni_goproject} %{ecscni_goimport}
+#ln -s %{ecscni_gorepo}-%{ecscni_gitrev} %{_builddir}/src/%{ecscni_goproject}
 # Symlink amazon-vpc-cni-plugins-%{vpccni_gitrev} to the GOPATH location
-%cross_go_setup %{name}-%{version}/%{vpccni_gorepo}-%{vpccni_gitrev} %{vpccni_goproject} %{vpccni_goimport}
-
+#ln -s %{vpccni_gorepo}-%{vpccni_gitrev} %{_builddir}/src/%{vpccni_goproject}
+#cd %{_builddir}
+#mkdir -p %{Name}-%{Version}/src/github.com/aws/
+#mv %{Name}-%{Version}/%{ecscni_gorepo}-%{ecscni_gitrev} %{Name}-%{Version}/src/github.com/aws/amazon-ecs-cni-plugins
+#mv %{Name}-%{Version}/%{vpccni_gorepo}-%{vpccni_gitrev}  %{Name}-%{Version}/src/github.com/aws/amazon-vpc-cni-plugins
+mv %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-ecs-cni-plugins* %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-ecs-cni-plugins
+mv %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-vpc-cni-plugins* %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-vpc-cni-plugins
 %build
-./scripts/build false %{gobuild_tag}
-
-cd "${BUILD_TOP}"
+%{_builddir}/amazon-ecs-agent/scripts/build false %{gobuild_tag}
 
 # Build the ECS CNI plugins
 # cross_go_configure cd's to the correct GOPATH location
-%cross_go_configure %{ecscni_goimport}
+
+export GOPATH=%{_builddir}/amazon-ecs-agent
+
+cd %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-ecs-cni-plugins
 LD_ECS_CNI_VERSION="-X github.com/aws/amazon-ecs-cni-plugins/pkg/version.Version=$(cat VERSION)"
 ECS_CNI_HASH="%{ecscni_gitrev}"
 LD_ECS_CNI_SHORT_HASH="-X github.com/aws/amazon-ecs-cni-plugins/pkg/version.GitShortHash=${ECS_CNI_HASH::8}"
@@ -88,11 +97,10 @@ go build -a \
   -o ecs-bridge \
   ./plugins/ecs-bridge
 
-cd "${BUILD_TOP}"
 
 # Build the VPC CNI plugins
 # cross_go_configure cd's to the correct GOPATH location
-%cross_go_configure %{vpccni_goimport}
+cd %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-vpc-cni-plugins
 LD_VPC_CNI_VERSION="-X github.com/aws/amazon-vpc-cni-plugins/version.Version=%{vpccni_gover}"
 VPC_CNI_HASH="%{vpccni_gitrev}"
 LD_VPC_CNI_SHORT_HASH="-X github.com/aws/amazon-vpc-cni-plugins/version.GitShortHash=${VPC_CNI_HASH::8}"
@@ -103,14 +111,18 @@ go build -a \
   -o vpc-branch-eni \
   ./plugins/vpc-branch-eni
 
+cd ..
+
+
 %install
-install -D generic_rpm %{buildroot}%{_libexecdir}/amazon-ecs-agent
+install -D %{_builddir}/amazon-ecs-agent/generic_rpm %{buildroot}%{_libexecdir}/amazon-ecs-agent
 install -D %{_topdir}/packaging/generic-rpm/ipSetup.sh %{buildroot}%{_libexecdir}/ipSetup.sh
 install -D %{_topdir}/packaging/generic-rpm/ipCleanup.sh %{buildroot}%{_libexecdir}/ipCleanup.sh
-install -D -p -m 0755 %{ecscni_gorepo}-%{ecscni_gitrev}/ecs-bridge %{buildroot}%{libexecdir}/amazon-ecs-agent/ecs-bridge
-install -D -p -m 0755 %{ecscni_gorepo}-%{ecscni_gitrev}/ecs-eni %{buildroot}%{libexecdir}/amazon-ecs-agent/ecs-eni
-install -D -p -m 0755 %{ecscni_gorepo}-%{ecscni_gitrev}/ecs-ipam %{buildroot}%{libexecdir}/amazon-ecs-agent/ecs-ipam
-install -D -p -m 0755 %{vpccni_gorepo}-%{vpccni_gitrev}/vpc-branch-eni %{buildroot}%{libexecdir}/amazon-ecs-agent/vpc-branch-eni
+install -D %{_topdir}/out/amazon-ecs-pause.tar %{buildroot}%{_sharedstatedir}/amazon-ecs-pause.tar
+install -D -p -m 0755 %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-ecs-cni-plugins/ecs-bridge %{buildroot}%{_libexecdir}/ecs-bridge
+install -D -p -m 0755 %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-ecs-cni-plugins/ecs-eni %{buildroot}%{_libexecdir}/ecs-eni
+install -D -p -m 0755 %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-ecs-cni-plugins/ecs-ipam %{buildroot}%{_libexecdir}/ecs-ipam
+install -D -p -m 0755 %{_builddir}/amazon-ecs-agent/src/github.com/aws/amazon-vpc-cni-plugins/vpc-branch-eni %{buildroot}%{_libexecdir}/vpc-branch-eni
 
 mkdir -p %{buildroot}%{_sysconfdir}/ecs
 touch %{buildroot}%{_sysconfdir}/ecs/ecs.config
@@ -125,6 +137,11 @@ install -m %{no_exec_perm} -D %{SOURCE1} $RPM_BUILD_ROOT/%{_unitdir}/ecs.service
 %{_libexecdir}/amazon-ecs-agent
 %{_libexecdir}/ipSetup.sh
 %{_libexecdir}/ipCleanup.sh
+%{_libexecdir}/ecs-bridge
+%{_libexecdir}/ecs-eni
+%{_libexecdir}/ecs-ipam
+%{_libexecdir}/vpc-branch-eni
+%{_sharedstatedir}/amazon-ecs-pause.tar
 %config(noreplace) %ghost %{_sysconfdir}/ecs/ecs.config
 %config(noreplace) %ghost %{_sysconfdir}/ecs/ecs.config.json
 %dir %{_sharedstatedir}/ecs/data
